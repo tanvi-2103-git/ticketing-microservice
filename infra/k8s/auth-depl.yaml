@@ -20,7 +20,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: mongo-secret
-                  key: MONGO_URI
+                  key: AUTH_MONGO_URI
             - name: JWT_KEY
               valueFrom:
                 secretKeyRef:
