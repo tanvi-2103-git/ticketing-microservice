@@ -1,0 +1,173 @@
+{
+  "info": {
+    "name": "Ticketing (microservices)",
+    "_postman_id": "a1b2c3d4-ticketing-local",
+    "description": "All HTTP APIs behind the ingress (single host).\n\n1. Set **baseUrl** (e.g. `http://ticketing.local`).\n2. Run **Signup** or **Signin** first — session cookie is `express:sess`. Enable Postman **Cookies** / cookie jar so responses set cookies for the domain.\n3. Replace **ticketId** / **orderId** path variables with real ids from list/create responses.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://ticketing.local" },
+    { "key": "ticketId", "value": "REPLACE_WITH_TICKET_MONGO_ID" },
+    { "key": "orderId", "value": "REPLACE_WITH_ORDER_MONGO_ID" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"buyer@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/signup",
+            "description": "Creates user and sets session cookie (JWT inside)."
+          }
+        },
+        {
+          "name": "Signin",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"buyer@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/signin"
+          }
+        },
+        {
+          "name": "Signout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "" },
+            "url": "{{baseUrl}}/api/users/signout"
+          }
+        },
+        {
+          "name": "Current user",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users/currentuser",
+            "description": "Requires session cookie from Signup/Signin."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tickets",
+      "item": [
+        {
+          "name": "Create ticket",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Concert\",\n  \"price\": 20\n}"
+            },
+            "url": "{{baseUrl}}/api/tickets",
+            "description": "Requires auth (session cookie)."
+          }
+        },
+        {
+          "name": "List tickets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/tickets"
+          }
+        },
+        {
+          "name": "Show ticket",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/tickets/{{ticketId}}"
+          }
+        },
+        {
+          "name": "Update ticket",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Concert (updated)\",\n  \"price\": 25\n}"
+            },
+            "url": "{{baseUrl}}/api/tickets/{{ticketId}}",
+            "description": "Requires auth; must own ticket."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create order",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ticketId\": \"{{ticketId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/orders",
+            "description": "Requires auth. `ticketId` is the ticket Mongo _id (24-char hex)."
+          }
+        },
+        {
+          "name": "List my orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/orders",
+            "description": "Requires auth."
+          }
+        },
+        {
+          "name": "Show order",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/orders/{{orderId}}",
+            "description": "Requires auth; must own order."
+          }
+        },
+        {
+          "name": "Cancel order",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/orders/{{orderId}}",
+            "description": "Requires auth; must own order."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Pay for order (dev — no Stripe)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/payments",
+            "description": "Requires auth; marks payment recorded and publishes `payment:created`."
+          }
+        }
+      ]
+    }
+  ]
+}
